@@ -23,6 +23,7 @@ def loadWords():
 
 def pickWord(allWords, answerSpace, ignoreChars):
     letterFrequency = {}
+    placementFrequency = [{}]*6
 
     if len(answerSpace) <= 2:
         return answerSpace[0]
@@ -30,6 +31,7 @@ def pickWord(allWords, answerSpace, ignoreChars):
     #Build letter frequency, ignoring characters that we already know
     for word in answerSpace:
         ignoreCharsCopy = ignoreChars
+        placementIndex = 0
         for letter in word:
             if letter in ignoreCharsCopy:
                 ignoreCharsCopy = ignoreCharsCopy.replace(letter,'',1)
@@ -39,8 +41,15 @@ def pickWord(allWords, answerSpace, ignoreChars):
 
                 letterFrequency[letter] += 1
 
+            if letter not in placementFrequency[placementIndex]:
+                placementFrequency[placementIndex][letter] = 0
+            placementFrequency[placementIndex][letter] += 1
+
+            placementIndex += 1
+
     bestWord = answerSpace[0]
     maxFrequency = 0
+    maxPlacementScore = 0
 
     # Score each word in full dictionary, ignoring letters we already know
     for word in allWords:
@@ -60,6 +69,22 @@ def pickWord(allWords, answerSpace, ignoreChars):
         if currentFrequency > maxFrequency:
             maxFrequency = currentFrequency
             bestWord = word
+
+            placementScore = 0
+            for i in range(len(word)):
+                if word[i] in placementFrequency[i]:
+                    placementScore += placementFrequency[i][word[i]]
+            maxPlacementScore = maxPlacementScore
+
+        elif currentFrequency == maxFrequency:
+            placementScore = 0
+            for i in range(len(word)):
+                if word[i] in placementFrequency[i]:
+                    placementScore += placementFrequency[i][word[i]]
+
+            if placementScore > maxPlacementScore:
+                maxPlacementScore = placementScore
+                bestWord = word
 
     return bestWord
 
@@ -125,16 +150,16 @@ def evaluateGuessResults(correctWord, guess):
 
     return result
 
-def play(ai=False, verbose=False):
+def play(ai=False, verbose=False, forceWord=''):
     guessResults = ''
     answerSpace, allWords = loadWords()
     numGuesses = 0
-    correctWord = ''
+    correctWord = forceWord
     ignoreChars = ''
 
-    if ai:
+    if ai and forceWord == '':
         correctWord = random.choice(answerSpace)
-        print("Word is", correctWord)
+        #print("Word is", correctWord)
 
     while len(answerSpace) > 0:
         if not ai or verbose:
@@ -159,7 +184,8 @@ def play(ai=False, verbose=False):
         answerSpace, ignoreChars = filterWords(answerSpace, currentGuess, guessResults, ignoreChars)
 
     if guessResults == 'ggggg':
-        print("Guessed in", numGuesses, "guesses.")
+        #print("Guessed in", numGuesses, "guesses.")
+        pass
     else:
         print("Could not guess word:",correctWord)
 
@@ -169,8 +195,18 @@ totalGuesses = 0
 maxGuessCount = 0
 numGames = 1
 random.seed(1)
-for _ in range(numGames):
-    currentGuessCount = play(False, False)
+ai = False
+if ai:
+    answerSpace, allWords = loadWords()
+    numGames = len(answerSpace)
+
+    for word in answerSpace:
+        currentGuessCount = play(True, False, word)
+        totalGuesses += currentGuessCount
+        if currentGuessCount > maxGuessCount:
+            maxGuessCount = currentGuessCount
+else:
+    currentGuessCount = play()
     totalGuesses += currentGuessCount
     if currentGuessCount > maxGuessCount:
         maxGuessCount = currentGuessCount
