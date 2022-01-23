@@ -1,3 +1,5 @@
+Development process documented here https://youtu.be/7Kfg5-JlA30
+
 # Wordle
 Run `python wordle.py` to play game
 
