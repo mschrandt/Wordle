@@ -30,5 +30,5 @@ Code structure:
   - Improvement #3: Use game's dictionary   Avg 3.88, Max 6
   - Improvement #4: When down to 2, pick 1  Avg 3.74, Max 5
 - Additional ideas?
-  - Consider letter position
+  - Consider letter position *Implemented, Avg 3.71*
   - Pick most average letters
